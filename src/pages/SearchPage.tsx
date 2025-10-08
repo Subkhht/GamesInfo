@@ -134,7 +134,6 @@ const SearchPage = () => {
               <GameCard
                 key={game.id}
                 game={game}
-                onClick={() => console.log('Game details:', game.id)}
                 onFavorite={() => handleToggleFavorite(game)}
                 onCompleted={() => handleToggleCompleted(game)}
                 onReview={() => handleReview(game)}

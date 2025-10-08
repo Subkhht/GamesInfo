@@ -27,7 +27,6 @@ const CompletedPage = () => {
           <GameCard
             key={game.id}
             game={game}
-            onClick={() => console.log('Game details:', game.id)}
             onFavorite={() => {
               if (isFavorite(game.id)) {
                 removeFavorite(game.id);

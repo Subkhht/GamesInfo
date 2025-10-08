@@ -87,6 +87,31 @@ export interface Tag {
   games_count: number;
 }
 
+export interface Trailer {
+  id: number;
+  name: string;
+  preview: string;
+  data: {
+    480: string;
+    max: string;
+  };
+}
+
+export interface TrailersResponse {
+  count: number;
+  results: Trailer[];
+}
+
+export interface Screenshot {
+  id: number;
+  image: string;
+}
+
+export interface ScreenshotsResponse {
+  count: number;
+  results: Screenshot[];
+}
+
 export interface GamesResponse {
   count: number;
   next: string | null;

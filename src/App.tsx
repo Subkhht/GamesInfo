@@ -8,6 +8,7 @@ const SearchPage = lazy(() => import('./pages/SearchPage'));
 const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
 const CompletedPage = lazy(() => import('./pages/CompletedPage'));
 const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
+const GameDetailsPage = lazy(() => import('./pages/GameDetailsPage'));
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<SearchPage />} />
+            <Route path="/game/:id" element={<GameDetailsPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/completed" element={<CompletedPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />

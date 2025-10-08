@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { GamesResponse, GameDetails, GameFilters } from '../types/game.types';
+import type { GamesResponse, GameDetails, GameFilters, TrailersResponse, ScreenshotsResponse } from '../types/game.types';
 
 const API_KEY = import.meta.env.VITE_RAWG_API_KEY || '';
 const BASE_URL = 'https://api.rawg.io/api';
@@ -13,12 +13,22 @@ const axiosInstance = axios.create({
 
 export const gamesApi = {
   getGames: async (filters: GameFilters = {}): Promise<GamesResponse> => {
+    // Limpiar parámetros vacíos
+    const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+      if (value !== '' && value !== undefined && value !== null) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as any);
+
     const { data } = await axiosInstance.get<GamesResponse>('/games', {
       params: {
-        ...filters,
+        ...cleanFilters,
         page_size: filters.page_size || 12,
       },
     });
+    
+    console.log('API Response:', data); // Para debug
     return data;
   },
 
@@ -35,6 +45,18 @@ export const gamesApi = {
         page_size: 12,
       },
     });
+    return data;
+  },
+
+  getGameTrailers: async (id: number): Promise<TrailersResponse> => {
+    console.log('Fetching trailers for game ID:', id);
+    const { data } = await axiosInstance.get<TrailersResponse>(`/games/${id}/movies`);
+    console.log('Trailers response:', data);
+    return data;
+  },
+
+  getGameScreenshots: async (id: number): Promise<ScreenshotsResponse> => {
+    const { data } = await axiosInstance.get<ScreenshotsResponse>(`/games/${id}/screenshots`);
     return data;
   },
 };

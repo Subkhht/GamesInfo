@@ -1,11 +1,11 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import type { Game } from '../../types/game.types';
 import { Heart, Trophy, Star } from 'lucide-react';
 import { useGamesStore } from '../../store/gamesStore';
 
 interface GameCardProps {
   game: Game;
-  onClick: () => void;
   onFavorite: () => void;
   onCompleted: () => void;
   onReview: () => void;
@@ -13,11 +13,11 @@ interface GameCardProps {
 
 export const GameCard: React.FC<GameCardProps> = ({
   game,
-  onClick,
   onFavorite,
   onCompleted,
   onReview,
 }) => {
+  const navigate = useNavigate();
   const { isFavorite, isCompleted } = useGamesStore();
 
   const getPlatformIcons = () => {
@@ -48,7 +48,10 @@ export const GameCard: React.FC<GameCardProps> = ({
       )}
 
       {/* Image */}
-      <div className="relative h-48 overflow-hidden" onClick={onClick}>
+      <div 
+        className="relative h-48 overflow-hidden cursor-pointer" 
+        onClick={() => navigate(`/game/${game.id}`)}
+      >
         <img
           src={game.background_image || 'https://via.placeholder.com/400x200?text=No+Image'}
           alt={game.name}
@@ -61,7 +64,10 @@ export const GameCard: React.FC<GameCardProps> = ({
       </div>
 
       {/* Content */}
-      <div className="p-5" onClick={onClick}>
+      <div 
+        className="p-5 cursor-pointer" 
+        onClick={() => navigate(`/game/${game.id}`)}
+      >
         <div className="flex justify-between items-start gap-3 mb-3">
           <h3 className="text-lg font-bold text-white line-clamp-2 flex-1">{game.name}</h3>
           {game.rating > 0 && (
