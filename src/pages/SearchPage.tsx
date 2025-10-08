@@ -100,13 +100,76 @@ const SearchPage = () => {
             onChange={(e) => handleFilterChange('platforms', e.target.value)}
             className="px-4 py-3 bg-gray-800 border-2 border-primary-500 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
           >
-            <option value="">Todas las plataformas</option>
-            <option value="4">PC</option>
-            <option value="187">PlayStation 5</option>
-            <option value="18">PlayStation 4</option>
-            <option value="1">Xbox One</option>
-            <option value="186">Xbox Series X</option>
-            <option value="7">Nintendo Switch</option>
+            <option value="">🎮 Todas las plataformas</option>
+            
+            <optgroup label="━━━ PC ━━━">
+              <option value="4">💻 PC (Windows)</option>
+              <option value="3">🍎 macOS</option>
+              <option value="6">🐧 Linux</option>
+            </optgroup>
+            
+            <optgroup label="━━━ PlayStation ━━━">
+              <option value="187">🎮 PlayStation 5</option>
+              <option value="18">🎮 PlayStation 4</option>
+              <option value="16">🎮 PlayStation 3</option>
+              <option value="15">🎮 PlayStation 2</option>
+              <option value="27">🎮 PlayStation</option>
+              <option value="19">🎮 PS Vita</option>
+              <option value="17">🎮 PSP</option>
+            </optgroup>
+            
+            <optgroup label="━━━ Xbox ━━━">
+              <option value="186">🎮 Xbox Series S/X</option>
+              <option value="1">🎮 Xbox One</option>
+              <option value="14">🎮 Xbox 360</option>
+              <option value="80">🎮 Xbox</option>
+            </optgroup>
+            
+            <optgroup label="━━━ Nintendo ━━━">
+              <option value="7">🎮 Nintendo Switch</option>
+              <option value="10">🎮 Wii U</option>
+              <option value="11">🎮 Wii</option>
+              <option value="105">🎮 GameCube</option>
+              <option value="83">🎮 Nintendo 64</option>
+              <option value="79">🎮 SNES</option>
+              <option value="49">🎮 NES</option>
+              <option value="8">🎮 Nintendo 3DS</option>
+              <option value="9">🎮 Nintendo DS</option>
+              <option value="13">🎮 Nintendo DSi</option>
+              <option value="24">🎮 Game Boy Advance</option>
+              <option value="43">🎮 Game Boy Color</option>
+              <option value="26">🎮 Game Boy</option>
+            </optgroup>
+            
+            <optgroup label="━━━ Mobile ━━━">
+              <option value="21">📱 Android</option>
+              <option value="3">📱 iOS</option>
+            </optgroup>
+            
+            <optgroup label="━━━ SEGA ━━━">
+              <option value="106">🕹️ Dreamcast</option>
+              <option value="119">🕹️ SEGA Saturn</option>
+              <option value="167">🕹️ Genesis/Mega Drive</option>
+              <option value="107">🕹️ SEGA 32X</option>
+              <option value="74">🕹️ SEGA Master System</option>
+              <option value="77">🕹️ Game Gear</option>
+              <option value="167">🕹️ SEGA CD</option>
+            </optgroup>
+            
+            <optgroup label="━━━ Otros ━━━">
+              <option value="171">🌐 Web</option>
+              <option value="55">🕹️ Classic Macintosh</option>
+              <option value="41">🕹️ Apple II</option>
+              <option value="166">🕹️ Commodore / Amiga</option>
+              <option value="28">🕹️ Atari 7800</option>
+              <option value="31">🕹️ Atari 5200</option>
+              <option value="23">🕹️ Atari 2600</option>
+              <option value="46">🕹️ Atari Lynx</option>
+              <option value="50">🕹️ Atari ST</option>
+              <option value="111">🕹️ 3DO</option>
+              <option value="112">🕹️ Atari Jaguar</option>
+              <option value="12">🕹️ Neo Geo</option>
+            </optgroup>
           </select>
 
           <select
