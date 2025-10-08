@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search } from 'lucide-react';
 import { gamesApi } from '../services/gamesApi';
 import { GameCard } from '../components/game/GameCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
-import { Button } from '../components/ui/Button';
+import { SearchAutocomplete } from '../components/ui/SearchAutocomplete';
 import { useGamesStore } from '../store/gamesStore';
 import type { GameFilters, Game } from '../types/game.types';
 
@@ -17,7 +16,8 @@ const SearchPage = () => {
     page: 1,
   });
 
-  const [searchInput, setSearchInput] = useState('');
+  const [allGames, setAllGames] = useState<Game[]>([]);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const { addFavorite, removeFavorite, addCompleted, removeCompleted, isFavorite, isCompleted } =
     useGamesStore();
@@ -27,12 +27,43 @@ const SearchPage = () => {
     queryFn: () => gamesApi.getGames(filters),
   });
 
-  const handleSearch = () => {
-    setFilters((prev) => ({ ...prev, search: searchInput, page: 1 }));
+  // Accumulate games on page change
+  useEffect(() => {
+    if (data?.results) {
+      if (filters.page === 1) {
+        setAllGames(data.results);
+      } else {
+        setAllGames((prev) => [...prev, ...data.results]);
+      }
+    }
+  }, [data, filters.page]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && data?.next && !isLoading) {
+          setFilters((prev) => ({ ...prev, page: (prev.page || 1) + 1 }));
+        }
+      },
+      { threshold: 0.8 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [data?.next, isLoading]);
+
+  const handleSearch = (query: string) => {
+    setFilters((prev) => ({ ...prev, search: query, page: 1 }));
+    setAllGames([]);
   };
 
   const handleFilterChange = (key: keyof GameFilters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
+    setAllGames([]);
   };
 
   const handleToggleFavorite = async (game: Game) => {
@@ -60,19 +91,7 @@ const SearchPage = () => {
     <div className="space-y-8">
       {/* Search Box */}
       <div className="bg-dark-card p-6 rounded-2xl border-2 border-primary-500 shadow-xl">
-        <div className="flex gap-3">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            placeholder="Buscar videojuegos..."
-            className="flex-1 px-4 py-3 bg-gray-800 border-2 border-primary-500 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
-          />
-          <Button onClick={handleSearch} size="lg" className="px-8">
-            <Search className="w-5 h-5" />
-          </Button>
-        </div>
+        <SearchAutocomplete onSearch={handleSearch} />
 
         {/* Filters */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -127,10 +146,10 @@ const SearchPage = () => {
         </div>
       )}
 
-      {data && data.results.length > 0 && (
+      {allGames.length > 0 && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {data.results.map((game) => (
+            {allGames.map((game) => (
               <GameCard
                 key={game.id}
                 game={game}
@@ -141,21 +160,17 @@ const SearchPage = () => {
             ))}
           </div>
 
-          {data.next && (
-            <div className="flex justify-center">
-              <Button
-                onClick={() => setFilters((prev) => ({ ...prev, page: (prev.page || 1) + 1 }))}
-                size="lg"
-                variant="secondary"
-              >
-                Cargar más juegos
-              </Button>
+          {/* Infinite Scroll Trigger */}
+          {data?.next && (
+            <div ref={loadMoreRef} className="py-8 text-center">
+              <div className="animate-spin w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full mx-auto" />
+              <p className="text-gray-400 mt-2">Cargando más juegos...</p>
             </div>
           )}
         </>
       )}
 
-      {data && data.results.length === 0 && (
+      {data && allGames.length === 0 && !isLoading && (
         <div className="text-center py-20">
           <p className="text-2xl text-gray-400">No se encontraron juegos</p>
           <p className="text-gray-500 mt-2">Intenta con otros filtros o términos de búsqueda</p>

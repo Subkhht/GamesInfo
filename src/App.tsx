@@ -1,18 +1,27 @@
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Header } from './components/layout/Header';
-import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import { LoadingSpinner } from './components/ui/LoadingSpinner.tsx';
+import { useTheme } from './context/ThemeContext';
 
 // Lazy loading de páginas
 const SearchPage = lazy(() => import('./pages/SearchPage'));
-const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
-const CompletedPage = lazy(() => import('./pages/CompletedPage'));
-const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
+const FavoritesPage = lazy(() => import('./pages/FavoritesPage.tsx'));
+const CompletedPage = lazy(() => import('./pages/CompletedPage.tsx'));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage.tsx'));
 const GameDetailsPage = lazy(() => import('./pages/GameDetailsPage'));
+const StatsPage = lazy(() => import('./pages/StatsPage'));
+const BacklogPage = lazy(() => import('./pages/BacklogPage'));
 
 function App() {
+  const { theme } = useTheme();
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark-bg via-gray-900 to-dark-bg">
+    <div className={`min-h-screen transition-colors duration-300 ${
+      theme === 'dark' 
+        ? 'bg-gradient-to-br from-dark-bg via-gray-900 to-dark-bg' 
+        : 'bg-gradient-to-br from-gray-100 via-gray-200 to-gray-100'
+    }`}>
       <Header />
       
       <main className="container mx-auto px-4 py-8 max-w-7xl">
@@ -23,6 +32,8 @@ function App() {
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/completed" element={<CompletedPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/stats" element={<StatsPage />} />
+            <Route path="/backlog" element={<BacklogPage />} />
           </Routes>
         </Suspense>
       </main>

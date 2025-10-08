@@ -137,6 +137,11 @@ export interface CompletedGame extends Game {
   completedAt: string;
 }
 
+export interface BacklogGame extends Game {
+  addedAt: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
 export interface GameReview {
   gameId: number;
   gameName: string;

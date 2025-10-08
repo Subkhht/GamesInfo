@@ -1,17 +1,27 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Star, Calendar, Users, Trophy, Heart, Check, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Users, Trophy, Heart, Check, MessageSquare, BookMarked } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import { gamesApi } from '../services/gamesApi';
 import { useGamesStore } from '../store/gamesStore';
 import { Button } from '../components/ui/Button';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { ReviewModal } from '../components/ui/ReviewModal';
+import { ImageLightbox } from '../components/ui/ImageLightbox';
 
 const GameDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addFavorite, removeFavorite, addCompleted, removeCompleted, isFavorite, isCompleted } =
-    useGamesStore();
+  const { 
+    addFavorite, removeFavorite, addCompleted, removeCompleted, 
+    addBacklog, removeBacklog, isFavorite, isCompleted, isBacklog,
+    addReview, reviews 
+  } = useGamesStore();
+  
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const { data: game, isLoading: gameLoading } = useQuery({
     queryKey: ['game', id],
@@ -29,6 +39,20 @@ const GameDetailsPage = () => {
     queryKey: ['screenshots', id],
     queryFn: () => gamesApi.getGameScreenshots(Number(id)),
     enabled: !!id,
+  });
+
+  // Similar games based on genres
+  const { data: similarGames } = useQuery({
+    queryKey: ['similar', id, game?.genres],
+    queryFn: () => {
+      const genreIds = game?.genres.map((g) => g.id).join(',');
+      return gamesApi.getGames({
+        genres: genreIds,
+        page: 1,
+        page_size: 6,
+      });
+    },
+    enabled: !!game && game.genres.length > 0,
   });
 
   if (gameLoading) {
@@ -66,6 +90,19 @@ const GameDetailsPage = () => {
       addCompleted(game as any);
     }
   };
+
+  const handleSubmitReview = (rating: number, text: string) => {
+    addReview({
+      gameId: game.id,
+      gameName: game.name,
+      gameImage: game.background_image,
+      rating,
+      text,
+      date: new Date().toISOString(),
+    });
+  };
+
+  const existingReview = reviews.find(r => r.gameId === game.id);
 
   const getPegiRating = () => {
     if (!game.esrb_rating) return null;
@@ -225,14 +262,40 @@ const GameDetailsPage = () => {
         </Button>
 
         <Button
-          onClick={() => navigate(`/reviews`)}
+          onClick={() => {
+            if (isBacklog(game.id)) {
+              removeBacklog(game.id);
+            } else {
+              addBacklog(game as any);
+            }
+          }}
+          variant={isBacklog(game.id) ? 'secondary' : 'primary'}
+          size="lg"
+        >
+          <BookMarked className={`w-5 h-5 mr-2 ${isBacklog(game.id) ? 'fill-current' : ''}`} />
+          {isBacklog(game.id) ? 'En Backlog' : 'Añadir a Backlog'}
+        </Button>
+
+        <Button
+          onClick={() => setIsReviewModalOpen(true)}
           variant="primary"
           size="lg"
         >
           <MessageSquare className="w-5 h-5 mr-2" />
-          Escribir Review
+          {existingReview ? 'Editar Review' : 'Escribir Review'}
         </Button>
       </div>
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        gameId={game.id}
+        gameName={game.name}
+        gameImage={game.background_image}
+        existingReview={existingReview}
+        onSubmit={handleSubmitReview}
+      />
 
       {/* Description */}
       <div className="bg-dark-card p-6 rounded-2xl border-2 border-primary-500">
@@ -290,17 +353,33 @@ const GameDetailsPage = () => {
         <div className="bg-dark-card p-6 rounded-2xl border-2 border-primary-500">
           <h2 className="text-3xl font-bold text-white mb-4">📸 Capturas de Pantalla</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {screenshots.results.slice(0, 6).map((screenshot) => (
+            {screenshots.results.slice(0, 6).map((screenshot, idx) => (
               <motion.img
                 key={screenshot.id}
                 src={screenshot.image}
                 alt={`Screenshot ${screenshot.id}`}
                 className="w-full h-48 object-cover rounded-xl cursor-pointer hover:scale-105 transition-transform"
                 whileHover={{ scale: 1.05 }}
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  setLightboxOpen(true);
+                }}
               />
             ))}
           </div>
         </div>
+      )}
+
+      {/* Image Lightbox */}
+      {screenshots && screenshots.results.length > 0 && (
+        <ImageLightbox
+          images={screenshots.results.slice(0, 6)}
+          currentIndex={lightboxIndex}
+          isOpen={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          onNext={() => setLightboxIndex((prev) => Math.min(prev + 1, screenshots.results.length - 1))}
+          onPrevious={() => setLightboxIndex((prev) => Math.max(prev - 1, 0))}
+        />
       )}
 
       {/* Tags */}
@@ -316,6 +395,71 @@ const GameDetailsPage = () => {
                 {tag.name}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Similar Games */}
+      {similarGames && similarGames.results.length > 0 && (
+        <div className="bg-dark-card p-6 rounded-2xl border-2 border-primary-500">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-white">🎮 Juegos Similares</h2>
+            <button
+              onClick={() => {
+                const genreIds = game.genres.map((g) => g.id).join(',');
+                navigate(`/?genres=${genreIds}`);
+              }}
+              className="text-primary-500 hover:text-primary-400 font-semibold flex items-center gap-2"
+            >
+              Ver más
+              <ArrowLeft className="w-4 h-4 rotate-180" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {similarGames.results
+              .filter((g) => g.id !== game.id)
+              .slice(0, 6)
+              .map((similarGame) => (
+                <button
+                  key={similarGame.id}
+                  onClick={() => navigate(`/game/${similarGame.id}`)}
+                  className="group bg-gray-800 rounded-2xl overflow-hidden border-2 border-transparent hover:border-primary-500 transition-all duration-300 transform hover:scale-105 text-left"
+                >
+                  {/* Image */}
+                  <div className="relative h-40 overflow-hidden">
+                    {similarGame.background_image ? (
+                      <img
+                        src={similarGame.background_image}
+                        alt={similarGame.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                        <span className="text-gray-600 text-4xl">🎮</span>
+                      </div>
+                    )}
+                    {similarGame.rating && (
+                      <div className="absolute top-2 right-2 bg-black/80 px-2 py-1 rounded-lg flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                        <span className="text-white font-bold">{similarGame.rating}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4">
+                    <h3 className="text-white font-bold text-lg line-clamp-2 mb-2 group-hover:text-primary-500 transition-colors">
+                      {similarGame.name}
+                    </h3>
+                    {similarGame.released && (
+                      <p className="text-gray-400 text-sm">
+                        {new Date(similarGame.released).getFullYear()}
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
           </div>
         </div>
       )}

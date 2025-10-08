@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import type { Game } from '../../types/game.types';
-import { Heart, Trophy, Star } from 'lucide-react';
+import { Heart, Trophy, Star, BookMarked } from 'lucide-react';
 import { useGamesStore } from '../../store/gamesStore';
 
 interface GameCardProps {
@@ -18,7 +18,7 @@ export const GameCard: React.FC<GameCardProps> = ({
   onReview,
 }) => {
   const navigate = useNavigate();
-  const { isFavorite, isCompleted } = useGamesStore();
+  const { isFavorite, isCompleted, isBacklog, addBacklog, removeBacklog } = useGamesStore();
 
   const getPlatformIcons = () => {
     if (!game.platforms || game.platforms.length === 0) return '🎮';
@@ -94,13 +94,13 @@ export const GameCard: React.FC<GameCardProps> = ({
         <div className="text-2xl mb-4">{getPlatformIcons()}</div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onFavorite();
             }}
-            className={`flex-1 p-2 rounded-lg border-2 transition-all ${
+            className={`p-2 rounded-lg border-2 transition-all ${
               isFavorite(game.id)
                 ? 'bg-pink-500 border-pink-500 text-white'
                 : 'bg-gray-800 border-primary-500 text-gray-300 hover:bg-primary-500 hover:text-white'
@@ -115,7 +115,7 @@ export const GameCard: React.FC<GameCardProps> = ({
               e.stopPropagation();
               onCompleted();
             }}
-            className={`flex-1 p-2 rounded-lg border-2 transition-all ${
+            className={`p-2 rounded-lg border-2 transition-all ${
               isCompleted(game.id)
                 ? 'bg-green-500 border-green-500 text-white'
                 : 'bg-gray-800 border-primary-500 text-gray-300 hover:bg-primary-500 hover:text-white'
@@ -128,9 +128,28 @@ export const GameCard: React.FC<GameCardProps> = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
+              if (isBacklog(game.id)) {
+                removeBacklog(game.id);
+              } else {
+                addBacklog(game as any);
+              }
+            }}
+            className={`p-2 rounded-lg border-2 transition-all ${
+              isBacklog(game.id)
+                ? 'bg-yellow-500 border-yellow-500 text-white'
+                : 'bg-gray-800 border-primary-500 text-gray-300 hover:bg-primary-500 hover:text-white'
+            }`}
+            title="Backlog"
+          >
+            <BookMarked className={`w-5 h-5 mx-auto ${isBacklog(game.id) ? 'fill-current' : ''}`} />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
               onReview();
             }}
-            className="flex-1 p-2 rounded-lg border-2 bg-gray-800 border-primary-500 text-gray-300 hover:bg-primary-500 hover:text-white transition-all"
+            className="p-2 rounded-lg border-2 bg-gray-800 border-primary-500 text-gray-300 hover:bg-primary-500 hover:text-white transition-all"
             title="Review"
           >
             <Star className="w-5 h-5 mx-auto" />

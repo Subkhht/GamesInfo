@@ -1,11 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { FavoriteGame, CompletedGame, GameReview } from '../types/game.types';
+import type { FavoriteGame, CompletedGame, GameReview, BacklogGame } from '../types/game.types';
 
 interface GamesStore {
   favorites: FavoriteGame[];
   completed: CompletedGame[];
   reviews: GameReview[];
+  backlog: BacklogGame[];
   
   // Favorites
   addFavorite: (game: FavoriteGame) => void;
@@ -16,6 +17,12 @@ interface GamesStore {
   addCompleted: (game: CompletedGame) => void;
   removeCompleted: (gameId: number) => void;
   isCompleted: (gameId: number) => boolean;
+  
+  // Backlog
+  addBacklog: (game: BacklogGame) => void;
+  removeBacklog: (gameId: number) => void;
+  isBacklog: (gameId: number) => boolean;
+  updateBacklogPriority: (gameId: number, priority: 'high' | 'medium' | 'low') => void;
   
   // Reviews
   addReview: (review: GameReview) => void;
@@ -30,6 +37,7 @@ export const useGamesStore = create<GamesStore>()(
       favorites: [],
       completed: [],
       reviews: [],
+      backlog: [],
 
       // Favorites
       addFavorite: (game) =>
@@ -60,6 +68,28 @@ export const useGamesStore = create<GamesStore>()(
       isCompleted: (gameId) => {
         return get().completed.some((game) => game.id === gameId);
       },
+
+      // Backlog
+      addBacklog: (game) =>
+        set((state) => ({
+          backlog: [...state.backlog, { ...game, addedAt: new Date().toISOString(), priority: 'medium' }],
+        })),
+
+      removeBacklog: (gameId) =>
+        set((state) => ({
+          backlog: state.backlog.filter((game) => game.id !== gameId),
+        })),
+
+      isBacklog: (gameId) => {
+        return get().backlog.some((game) => game.id === gameId);
+      },
+
+      updateBacklogPriority: (gameId, priority) =>
+        set((state) => ({
+          backlog: state.backlog.map((game) =>
+            game.id === gameId ? { ...game, priority } : game
+          ),
+        })),
 
       // Reviews
       addReview: (review) =>
