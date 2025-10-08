@@ -28,7 +28,6 @@ export const gamesApi = {
       },
     });
     
-    console.log('API Response:', data); // Para debug
     return data;
   },
 
@@ -49,9 +48,7 @@ export const gamesApi = {
   },
 
   getGameTrailers: async (id: number): Promise<TrailersResponse> => {
-    console.log('Fetching trailers for game ID:', id);
     const { data } = await axiosInstance.get<TrailersResponse>(`/games/${id}/movies`);
-    console.log('Trailers response:', data);
     return data;
   },
 

@@ -1,0 +1,78 @@
+# 🎯 INSTRUCCIONES - CONFIGURAR GITHUB PAGES
+
+## 📍 PESTAÑA 1: Configurar Secret (Secrets and variables)
+
+### ✅ Pasos:
+1. Haz clic en el botón verde **"New repository secret"**
+2. Llena los campos:
+   ```
+   Name:   VITE_RAWG_API_KEY
+   Value:  95454f89ab8943dc9878380ef9c1f72b
+   ```
+3. Haz clic en **"Add secret"**
+
+---
+
+## 📍 PESTAÑA 2: Habilitar GitHub Pages (Pages)
+
+### ✅ Pasos:
+1. En **"Build and deployment"**
+2. En **"Source"**, selecciona del dropdown:
+   ```
+   GitHub Actions
+   ```
+3. ¡Listo! Se guardará automáticamente
+
+---
+
+## 🚀 PASO FINAL: Ejecutar el Deploy
+
+Una vez hayas completado los 2 pasos anteriores:
+
+1. Ve a: **https://github.com/Subkhht/GamesInfo/actions**
+2. Verás el workflow ejecutándose automáticamente
+3. Si no se ejecuta automáticamente:
+   - Haz clic en "Deploy to GitHub Pages" (lado izquierdo)
+   - Haz clic en **"Run workflow"** (botón azul)
+   - Selecciona "main" branch
+   - Haz clic en **"Run workflow"** (botón verde)
+4. Espera 2-3 minutos
+
+---
+
+## 🌐 TU SITIO ESTARÁ EN:
+
+### ✨ https://subkhht.github.io/GamesInfo/
+
+---
+
+## 📸 VISUAL DE LOS PASOS:
+
+### Secret:
+```
+┌─────────────────────────────────────────┐
+│ New repository secret                   │
+├─────────────────────────────────────────┤
+│ Name *                                  │
+│ VITE_RAWG_API_KEY                      │
+│                                         │
+│ Secret *                                │
+│ 95454f89ab8943dc9878380ef9c1f72b      │
+│                                         │
+│ [Add secret]                            │
+└─────────────────────────────────────────┘
+```
+
+### Pages:
+```
+┌─────────────────────────────────────────┐
+│ Build and deployment                    │
+├─────────────────────────────────────────┤
+│ Source                                  │
+│ [v GitHub Actions]  ← Selecciona esto  │
+└─────────────────────────────────────────┘
+```
+
+---
+
+**¡Avísame cuando hayas completado ambos pasos!**

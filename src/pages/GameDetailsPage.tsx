@@ -10,30 +10,20 @@ import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 const GameDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { addFavorite, removeFavorite, addCompleted, removeCompleted, isFavorite, isCompleted, addReview } =
+  const { addFavorite, removeFavorite, addCompleted, removeCompleted, isFavorite, isCompleted } =
     useGamesStore();
 
-  console.log('Game ID from URL:', id);
-
-  const { data: game, isLoading: gameLoading, error: gameError } = useQuery({
+  const { data: game, isLoading: gameLoading } = useQuery({
     queryKey: ['game', id],
     queryFn: () => gamesApi.getGameDetails(Number(id)),
     enabled: !!id,
   });
-
-  console.log('Game data:', game);
-  console.log('Loading:', gameLoading);
-  console.log('Error:', gameError);
 
   const { data: trailers } = useQuery({
     queryKey: ['trailers', id],
     queryFn: () => gamesApi.getGameTrailers(Number(id)),
     enabled: !!id,
   });
-
-  console.log('Trailers data:', trailers);
-  console.log('Trailers count:', trailers?.count);
-  console.log('Trailers results:', trailers?.results);
 
   const { data: screenshots } = useQuery({
     queryKey: ['screenshots', id],
@@ -42,7 +32,6 @@ const GameDetailsPage = () => {
   });
 
   if (gameLoading) {
-    console.log('Mostrando loading spinner...');
     return (
       <div className="flex justify-center items-center min-h-screen">
         <LoadingSpinner />
@@ -52,15 +41,12 @@ const GameDetailsPage = () => {
   }
 
   if (!game) {
-    console.log('Game no encontrado');
     return (
       <div className="text-center py-20">
         <p className="text-2xl text-gray-400">Juego no encontrado</p>
       </div>
     );
   }
-
-  console.log('Renderizando página con game:', game.name);
 
   const isFav = isFavorite(game.id);
   const isComp = isCompleted(game.id);
